@@ -1,11 +1,4 @@
 version: 1
-backend:
-  phases:
-    build:
-      commands:
-        - '# Execute Amplify CLI commands to provision backend resources'
-        - cd my-app
-        - amplify push --yes
 frontend:
   phases:
     preBuild:
