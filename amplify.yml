@@ -1,0 +1,46 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Starting preBuild phase"
+        - cd my-app
+        - npm ci
+        - echo "Dependencies installed successfully"
+    build:
+      commands:
+        - echo "Starting build phase"
+        - npm run build
+        - echo "Build completed successfully"
+  artifacts:
+    baseDirectory: my-app/.next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - my-app/node_modules/**/*
+      - my-app/.next/cache/**/*
+
+backend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Backend preBuild phase"
+        - cd my-app
+        - npm ci
+        - echo "Backend dependencies installed"
+    build:
+      commands:
+        - echo "Backend build phase"
+        - npm run build
+        - echo "Lambda functions prepared"
+  artifacts:
+    baseDirectory: my-app/.next
+    files:
+      - '**/*'
+
+# Environment variables for the entire app
+environment:
+  variables:
+    NODE_ENV: production
+    NEXT_PUBLIC_APP_ENV: production

@@ -9,7 +9,10 @@ export async function POST(req: NextRequest) {
   try {
     const payload = await req.json()
 
-    const res = await fetch("https://2f2279683902.ngrok-free.app/notarize", {
+    // Use environment variable for the notarize URL
+    const notarizeUrl = process.env.NEXT_PUBLIC_NOTARIZE_URL || "https://2f2279683902.ngrok-free.app/notarize"
+
+    const res = await fetch(notarizeUrl, {
       method: "POST",
       headers: {
         accept: "application/json",
