@@ -1,6 +1,6 @@
-# AWS Amplify Deployment Guide
+# AWS Amplify Frontend-Only Deployment Guide
 
-This guide will help you deploy your Next.js application with Lambda functions to AWS Amplify.
+This guide will help you deploy your Next.js application as a static frontend to AWS Amplify.
 
 ## Prerequisites
 
@@ -19,12 +19,12 @@ This guide will help you deploy your Next.js application with Lambda functions t
 
 ### 2. Configure Build Settings
 
-The `amplify.yml` file is already configured for your Next.js app. Amplify will automatically detect it.
+The `amplify.yml` file is already configured for your Next.js static export. Amplify will automatically detect it.
 
 **Build Settings:**
 - Build command: `npm run build`
 - Base directory: `my-app`
-- Build output directory: `.next`
+- Build output directory: `out`
 
 ### 3. Environment Variables
 
@@ -33,19 +33,9 @@ Add these environment variables in the Amplify console under **App settings** �
 ```
 NODE_ENV=production
 NEXT_PUBLIC_APP_ENV=production
-NEXT_PUBLIC_NOTARIZE_URL=https://2f2279683902.ngrok-free.app/notarize
 ```
 
-### 4. Lambda Function Configuration
-
-Your API route `/api/notarize` will be automatically deployed as a Lambda function. The configuration is in `amplify.yml`:
-
-- **Runtime**: Node.js 18.x
-- **Memory**: 256 MB
-- **Timeout**: 30 seconds
-- **CORS**: Enabled
-
-### 5. Custom Domain (Optional)
+### 4. Custom Domain (Optional)
 
 1. In Amplify console, go to **Domain management**
 2. Add your custom domain
@@ -58,66 +48,83 @@ Your API route `/api/notarize` will be automatically deployed as a Lambda functi
 ├── amplify.yml                 # Amplify build configuration
 ├── my-app/
 │   ├── app/
-│   │   ├── api/
-│   │   │   └── notarize/
-│   │   │       └── route.ts    # API route (deployed as Lambda)
+│   │   ├── claimer-dashboard/
+│   │   ├── guided-report/
+│   │   ├── insurance-dashboard/
+│   │   ├── police-dashboard/
+│   │   ├── post-submission/
 │   │   └── ...
-│   ├── lambda/
-│   │   └── notarize.js         # Standalone Lambda function
-│   ├── next.config.mjs         # Next.js configuration
+│   ├── components/
+│   ├── next.config.mjs         # Next.js static export configuration
 │   ├── package.json            # Dependencies and scripts
 │   └── env.example             # Environment variables template
 ```
 
 ## Key Features
 
-### ✅ Configured for Amplify
-- Optimized Next.js configuration
-- Proper build settings
-- Lambda function support
-- Environment variable management
+### ✅ Static Export Configuration
+- Next.js configured for static export (`output: 'export'`)
+- No server-side rendering or API routes
+- Optimized for static hosting
+- Image optimization disabled for compatibility
 
-### ✅ Lambda Functions
-- API routes automatically deployed as Lambda functions
-- Standalone Lambda function for `/api/notarize`
-- CORS enabled
-- Error handling and logging
+### ✅ Amplify Optimized
+- Proper build settings for static export
+- Caching configuration for better performance
+- Environment variable support
+- Automatic HTTPS and CDN
 
 ### ✅ Performance Optimizations
-- Image optimization disabled (for Amplify compatibility)
+- Static file generation
 - Compression enabled
-- Standalone output for better performance
-- Proper caching configuration
+- Proper caching headers
+- Optimized bundle size
+
+## Important Notes
+
+### ⚠️ No Server-Side Features
+- **API Routes**: Removed (not compatible with static export)
+- **Server-Side Rendering**: Disabled
+- **Dynamic Routes**: Limited to static generation
+- **Database Connections**: Not available
+
+### ✅ Frontend-Only Features
+- **Static Pages**: All pages are pre-rendered
+- **Client-Side JavaScript**: Full React functionality
+- **External API Calls**: Can call external APIs from client-side
+- **Static Assets**: Images, CSS, JS served from CDN
 
 ## Troubleshooting
 
 ### Build Failures
 1. Check Node.js version (should be 18+)
 2. Verify all dependencies are in `package.json`
-3. Check environment variables are set correctly
+3. Ensure no server-side code is being used
+4. Check for dynamic imports that require server-side rendering
 
-### Lambda Function Issues
-1. Verify the Lambda function is deployed in AWS Console
-2. Check CloudWatch logs for errors
-3. Ensure CORS headers are properly set
+### Static Export Issues
+1. Remove any `getServerSideProps` or `getStaticProps` with dynamic data
+2. Ensure all pages can be statically generated
+3. Check for server-only imports (like `fs`, `path`)
 
-### API Route Issues
-1. Test the API route locally first
-2. Check the external service URL is accessible
-3. Verify environment variables are passed to Lambda
+### External API Calls
+If you need to call external APIs:
+1. Use client-side fetch in `useEffect` or event handlers
+2. Handle CORS properly on the external API
+3. Consider using a separate backend service for sensitive operations
 
 ## Monitoring
 
 - **Amplify Console**: Monitor build status and deployments
-- **CloudWatch**: Monitor Lambda function logs and metrics
-- **AWS X-Ray**: Trace requests (if enabled)
+- **CloudWatch**: Monitor CDN and hosting metrics
+- **Browser DevTools**: Monitor client-side performance
 
 ## Security Considerations
 
-1. **Environment Variables**: Never commit sensitive data to the repository
-2. **CORS**: Configure CORS properly for your domain
-3. **API Keys**: Store API keys in Amplify environment variables
-4. **HTTPS**: Amplify automatically provides HTTPS
+1. **Environment Variables**: Only `NEXT_PUBLIC_*` variables are available client-side
+2. **API Keys**: Never expose sensitive keys in client-side code
+3. **HTTPS**: Amplify automatically provides HTTPS
+4. **CORS**: Configure CORS on external APIs properly
 
 ## Next Steps
 
@@ -130,5 +137,5 @@ Your API route `/api/notarize` will be automatically deployed as a Lambda functi
 ## Support
 
 - [AWS Amplify Documentation](https://docs.aws.amazon.com/amplify/)
-- [Next.js Deployment Guide](https://nextjs.org/docs/deployment)
-- [Lambda Function Guide](https://docs.aws.amazon.com/lambda/)
+- [Next.js Static Export Guide](https://nextjs.org/docs/advanced-features/static-html-export)
+- [Amplify Hosting Guide](https://docs.aws.amazon.com/amplify/latest/userguide/getting-started.html)

@@ -6,19 +6,23 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Amplify-specific configuration
-  output: 'standalone',
-  experimental: {
-    outputFileTracingRoot: undefined,
-  },
-  // Enable serverless functions for API routes
-  trailingSlash: false,
-  // Optimize for Lambda deployment
-  compress: true,
-  poweredByHeader: false,
-  // Configure for AWS Amplify
+  // Static export configuration for frontend-only deployment
+  output: 'export',
+  trailingSlash: true,
+  // Disable server-side features for static export
   images: {
     unoptimized: true,
+  },
+  // Disable features that require server-side rendering
+  experimental: {
+    appDir: true,
+  },
+  // Optimize for static hosting
+  compress: true,
+  poweredByHeader: false,
+  // Disable API routes for static export
+  async rewrites() {
+    return [];
   },
 };
 
