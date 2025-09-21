@@ -8,8 +8,8 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Live Dispatch System",
-  description: "Blockchain-enabled emergency response and insurance claim processing",
+  title: "Autonomous Claim Solution",
+  description: "Agentic AI empowered seamless claim resolution",
   generator: "v0.app",
 }
 

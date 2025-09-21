@@ -175,13 +175,7 @@ export default function GuidedReport() {
     }, 2000)
   }
 
-  const handlePhotoCapture = (slot: PhotoSlot, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file && file.type.startsWith("image/")) {
-      const preview = URL.createObjectURL(file)
-      setPhotos((prev) => prev.map((photo) => (photo.slot === slot ? { ...photo, file, preview } : photo)))
-    }
-  }
+
 
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
@@ -215,29 +209,23 @@ export default function GuidedReport() {
     }
   }
 
-  const generateAISummary = () => {
+  const generateAISummary = async () => {
     setIsGeneratingAI(true)
-    // Simulate AI processing
-    setTimeout(() => {
-      setAiSummary(`
-**Incident Summary Report**
-
-Based on the provided evidence, this appears to be a vehicular incident involving property damage. The submitted photos show damage to multiple angles of the vehicle, with the most significant impact visible on the left side panel and rear bumper area.
-
-**Key Observations:**
-• Multiple impact points suggest collision or contact incident
-• Damage pattern consistent with side-swipe or parking lot incident  
-• Video evidence shows the immediate aftermath and surrounding area
-• User description indicates: "${description.slice(0, 100)}..."
-
-**Estimated Severity:** Moderate
-**Recommended Action:** Forward to insurance verification and workshop coordination
-**Confidence Level:** 94%
-
-This report has been generated using AI analysis of visual evidence and user testimony.
-      `)
-      setIsGeneratingAI(false)
-    }, 3000)
+    try {
+      const response = await fetch('https://tno21drqkk.execute-api.us-east-1.amazonaws.com/prod/summarize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ transcription: description })
+      })
+      
+      const data = await response.json()
+      setAiSummary(data || 'No response from AI service')
+    } catch (error) {
+      setAiSummary('Error generating AI summary: ' + error)
+    }
+    setIsGeneratingAI(false)
   }
 
   const nextStep = () => {
@@ -339,43 +327,8 @@ This report has been generated using AI analysis of visual evidence and user tes
   }
 
   const handleSubmit = async () => {
-    try {
-      // First submit to API
-      await submitReportToAPI()
-
-      // Then proceed with UI updates
-      setIsSubmitted(true)
-
-      // Start the submission timeline
-      const interval = setInterval(() => {
-        setSubmissionTime((prev) => {
-          const newTime = prev + 1
-
-          // Update steps based on time
-          setSubmissionSteps((prevSteps) =>
-            prevSteps.map((step) => {
-              const stepTime = Number.parseInt(step.timestamp)
-              if (newTime === stepTime) {
-                return { ...step, status: "processing" }
-              } else if (newTime === stepTime + 1) {
-                return { ...step, status: "completed" }
-              }
-              return step
-            }),
-          )
-
-          // Clear interval after all steps are done
-          if (newTime >= 8) {
-            clearInterval(interval)
-          }
-
-          return newTime
-        })
-      }, 1000)
-    } catch (error) {
-      // Handle API error - don't proceed with submission
-      console.error("Failed to submit report:", error)
-    }
+    // Redirect to post-submission page
+    window.location.href = '/post-submission'
   }
 
   const copyToken = (token: string) => {
@@ -448,18 +401,26 @@ This report has been generated using AI analysis of visual evidence and user tes
                               </div>
                             </div>
                           ) : (
-                            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-purple-100/50 transition-colors">
+                            <div 
+                              className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-purple-100/50 transition-colors"
+                              onClick={() => {
+                                // Load demo image based on slot
+                                const demoImageMap = {
+                                  front: '/demo-images/front.jpg',
+                                  back: '/demo-images/back.png', 
+                                  left: '/demo-images/left.png',
+                                  right: '/demo-images/right.png'
+                                }
+                                
+                                const preview = demoImageMap[photo.slot]
+                                const mockFile = new File([''], `${photo.slot}-demo.jpg`, { type: 'image/jpeg' })
+                                setPhotos((prev) => prev.map((p) => (p.slot === photo.slot ? { ...p, file: mockFile, preview } : p)))
+                              }}
+                            >
                               <Camera className="w-8 h-8 text-purple-400 mb-2" />
                               <span className="text-sm font-medium text-purple-600">{photo.label}</span>
                               <span className="text-xs text-purple-500 mt-1">Tap to capture</span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                onChange={(e) => handlePhotoCapture(photo.slot, e)}
-                                className="hidden"
-                              />
-                            </label>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -494,13 +455,29 @@ This report has been generated using AI analysis of visual evidence and user tes
                     <p className="text-sm text-slate-600 mb-4">
                       Videos help provide context and motion details of the incident
                     </p>
-                    <Button
-                      onClick={() => videoInputRef.current?.click()}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Choose Video Files
-                    </Button>
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => videoInputRef.current?.click()}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Choose Video Files
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          // Load demo dashcam video
+                          const videoUrl = '/demo-images/webcam.mp4'
+                          const mockFile = new File([''], 'dashcam-footage.mp4', { type: 'video/mp4' })
+                          const newVideo: VideoFile = { file: mockFile, preview: videoUrl }
+                          setVideos((prev) => [...prev, newVideo])
+                        }}
+                        variant="outline"
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Camera className="w-4 h-4 mr-2" />
+                        Get Dashcam
+                      </Button>
+                    </div>
                   </div>
 
                   {videos.length > 0 && (
@@ -575,15 +552,34 @@ This report has been generated using AI analysis of visual evidence and user tes
                       </Button>
 
                       <Button
-                        onClick={toggleSpeechRecognition}
+                        onClick={() => {
+                          setIsListening(true)
+                          
+                          const fullText = "Saya tengah bawa van tu perlahan je, tiba-tiba kereta depan brek mengejut. Saya cuba tekan brek kuat-kuat tapi tak sempat, van terus hentam bahagian depan. Saya rasa hentakan kuat sangat, terus keluar asap. Airbag pun terus terbuka depan muka saya. Hidung saya sakit sikit sebab kena airbag, dada pun rasa berdebar kuat. Nasib baik saya masih sedar. Saya nampak orang ramai datang tolong, ada yang tanya saya okay ke. Saya cuma takut kalau enjin van terbakar sebab ada bau minyak kuat keluar dari depan. Saya tak boleh gerak sangat sebab kaki rasa tersepit dekat pedal."
+                          const words = fullText.split(' ')
+                          
+                          let currentWord = 0
+                          const addWord = () => {
+                            if (currentWord < words.length) {
+                              setDescription(prev => prev + (prev ? " " : "") + words[currentWord])
+                              currentWord++
+                              setTimeout(addWord, 150) // Add next word after 150ms
+                            } else {
+                              setIsListening(false)
+                            }
+                          }
+                          
+                          setTimeout(addWord, 300) // Start after 300ms
+                        }}
                         variant="outline"
                         className={cn(
                           "border-purple-200 hover:bg-purple-50 bg-transparent",
-                          isListening ? "text-red-600 border-red-200" : "text-purple-700",
+                          isListening ? "text-white bg-red-500 border-red-500 hover:bg-red-600" : "text-purple-700",
                         )}
+                        disabled={isListening}
                       >
                         <Mic className="w-4 h-4 mr-2" />
-                        {isListening ? "Stop Recording" : "Voice Input"}
+                        {isListening ? "Voice Recording..." : "Voice Input"}
                       </Button>
                     </div>
 

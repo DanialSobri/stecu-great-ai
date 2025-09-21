@@ -7,7 +7,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Menu, X, Home, FileText, Smartphone, Shield, Badge, BarChart3, ChevronRight } from "lucide-react"
+import { Menu, X, Home, FileText, Smartphone, Shield, Badge, BarChart3, ChevronRight, Code } from "lucide-react"
 
 interface NavigationItem {
   href: string
@@ -60,6 +60,13 @@ const navigationItems: NavigationItem[] = [
     description: "Real-time progress",
     category: "tracking",
   },
+  {
+    href: "/api-test",
+    label: "API Documentation",
+    icon: <Code className="w-5 h-5" />,
+    description: "Test and explore APIs",
+    category: "tracking",
+  },
 ]
 
 const categoryLabels = {
@@ -108,7 +115,7 @@ export function NavigationDrawer() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-slate-800">Navigation</h2>
-              <p className="text-sm text-slate-600 mt-1">Live Dispatch System</p>
+              <p className="text-sm text-slate-600 mt-1">Autonomous Claim Solution</p>
             </div>
             <Button onClick={toggleDrawer} variant="ghost" size="sm" className="p-2">
               <X className="w-4 h-4" />
@@ -173,8 +180,8 @@ export function NavigationDrawer() {
         {/* Footer */}
         <div className="p-4 border-t border-slate-200 bg-slate-50">
           <div className="text-xs text-slate-500 text-center">
-            <div className="font-medium">Live Dispatch UX</div>
-            <div className="mt-1">Blockchain-enabled emergency response</div>
+            <div className="font-medium">Autonomous Claim Solution</div>
+            <div className="mt-1">Agentic AI empowered seamless claim resolution</div>
           </div>
         </div>
       </div>
