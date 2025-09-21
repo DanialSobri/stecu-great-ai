@@ -8,8 +8,8 @@ import os
 app = FastAPI()
 
 # You may want to use environment variables for credentials in production
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "AKIA3ODSYGTRA7YEA7HL")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "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")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
 client = boto3.client(
     "bedrock-runtime",
